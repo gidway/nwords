@@ -9,15 +9,75 @@ function debuglog ($m) {
 <html>
 <head>
  <meta charset="utf-8" />
+ <meta name="format-detection" content="telephone=no" /> 
  <title>nWords</title>
  <style type="text/css"><!--
-   * {font-family:monospace;}
    .w {margin:0em 1em;font-size:.9em;}
    .w:hover {background-color:silver;}
    .w a {text-decoration:none;}
    .w a:hover, .w a:active, .w:hover a:before {text-decoration:none;color:red;}
    .w a:before {content:'znaczenie: ';color:gray;padding-left:1em;}
    .w span {font-size:1.5em;}
+
+   p {font-size:.5em;}
+
+   input[type="text"], input[type="number"] {
+      -webkit-appearance: none; -moz-appearance: none;
+     display: block;
+	 margin: 0; padding:.5em;
+     width: 100%; height: 5em;
+     line-height: 5em; font-size: 1.1em;
+     border: 1px solid #bbb;
+   }
+
+   div.tr {clear:both;border:1px solid silver;padding:.4em;margin:0.3em;}
+   div.th {clear:both;font-size:1.1em;font-weight:bolder;}
+   div.th.button input, button[type=submit] {
+      -webkit-appearance: none; -moz-appearance: none;
+      display: block;
+      margin: 1.5em 0;
+	  font-size: 1em; line-height: 2.5em;
+      color: #333;
+      font-weight: bold;
+      height: 2.5em; width: 100%;
+      background: #fdfdfd;
+      background: -moz-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fdfdfd), color-stop(100%,#bebebe));
+      background: -webkit-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
+      background: -o-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
+      background: -ms-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
+      background: linear-gradient(to bottom, #fdfdfd 0%,#bebebe 100%);
+      border: 1px solid #bbb;
+      -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px;
+   }
+   div.th.colspan-2 {}
+   div.td {}
+   div.desc {clear:both;font-size:.7em;}
+
+   /* unstyled tel links as default */
+   a[href^='tel:']:link, a[href^='tel:']:visited {
+      color: #6f757c;
+      font-weight: normal;
+      text-decoration: none;
+   }
+   a[href^='tel:']:hover, a[href^='tel:']:active {
+      color: #6f757c;
+      text-decoration: none;
+   }
+
+   /* styled tel links for small viewports */
+   @media screen and (max-width: 600px) {
+      a[href^='tel:']:link, a[href^='tel:']:visited {
+		 color: #333;
+         font-weight: bold;
+         text-decoration: underline;
+      }
+      a[href^='tel:']:hover, a[href^='tel:']:active {
+         color: #333;
+         text-decoration: none;
+      }
+   }
+
  --></style>
 </head>
 <body style="padding-top:4em;">
@@ -37,34 +97,34 @@ $prefix = htmlspecialchars(strtolower($_REQUEST['prefix']));
 <a name="top"></a>
 <a href="<?=dirname($_SERVER['SCRIPT_NAME']);?>"><?=dirname($_SERVER['SCRIPT_NAME']);?></a>
 
-<p style="max-width:900px;">Dopasuj polskie wyrazy. U&#380;yteczne przy r&#243;&#380;nej ma&#347;ci gierek. Brak Ci podpowiedzi? Pozw&#243;l by maszyna zrobi&#322;a to za Ciebie! Bazuje na li&#347;cie wyraz&#243;w polskich udost&#281;pnionych przez <b>&quot;S&#322;ownik j&#281;zyka polskiego SJP&quot;</b> <a href="https://sjp.pl/">https://sjp.pl/</a></p>
-<form action="<?php $_PHP_SELF ?>" method="get" target="_self">
- <table cellspacing="2px" cellpadding="2px" border="0">
-  <tr>
-   <th>Literki: </th>
-   <td><input type="text" name="letters" value="<?=$letters;?>" maxlength="999" /></td>
-   <td>wszystkie z kt&#243;rych ma/mo&#380;e sk&#322;ada&#263; si&#281; szukany wyraz, r&#243;wnie&#380; te zawarte w prefix. R&#243;wnie&#380; powtarzaj&#261;ce si&#281;.</td>
-  </tr>
-  <tr>
-   <th>D&#322;ugo&#347;&#263;: </th>
-   <td><input type="number" name="length" value="<?=$word_length;?>" min="0" max="99" /></td>
-   <td>oczekiwana d&#322;ugo&#347;&#263; szukanego s&#322;owa</td>
-  </tr>
-  <tr>
-   <th>Prefix: </th>
-   <td><input type="text" name="prefix" value="<?=$prefix;?>" maxlength="99" /></td>
-   <td>(opcjonalne) od jakich literek zaczyna si&#281; wyraz</td>
-  </tr>
-  <tr>
-	<th colspan="2">
+<p align="justify" onclick="this.style.display='none';">Dopasuj polskie wyrazy. U&#380;yteczne przy r&#243;&#380;nej ma&#347;ci gierek. Brak Ci podpowiedzi? Pozw&#243;l by maszyna zrobi&#322;a to za Ciebie! Bazuje na li&#347;cie wyraz&#243;w polskich udost&#281;pnionych przez <b>&quot;S&#322;ownik j&#281;zyka polskiego SJP&quot;</b> <a href="https://sjp.pl/">https://sjp.pl/</a></p>
+
+<form action="<?php $_PHP_SELF ?>#list" method="get" target="_self">
+ <div class="table">
+  <div class="tr">
+   <div class="th">Literki: </div>
+   <div class="td"><input type="text" name="letters" value="<?=$letters;?>" maxlength="999" /></div>
+   <div class="desc" onclick="this.style.display='none';">wszystkie z kt&#243;rych ma/mo&#380;e sk&#322;ada&#263; si&#281; szukany wyraz, r&#243;wnie&#380; te zawarte w prefix. R&#243;wnie&#380; powtarzaj&#261;ce si&#281;.</div>
+  </div>
+  <div class="tr">
+   <div class="th">D&#322;ugo&#347;&#263;: </div>
+   <div class="td"><input type="number" name="length" value="<?=$word_length;?>" min="0" max="99" /></div>
+   <div class="desc" onclick="this.style.display='none';">oczekiwana d&#322;ugo&#347;&#263; szukanego s&#322;owa</div>
+  </div>
+  <div class="tr">
+   <div class="th">Prefix: </div>
+   <div class="td"><input type="text" name="prefix" value="<?=$prefix;?>" maxlength="99" /></div>
+   <div class="desc" onclick="this.style.display='none';">(opcjonalne) od jakich literek zaczyna si&#281; wyraz</div>
+  </div>
+  <div class="tr">
+	<div class="th button">
 		<input type="submit" value="Szukaj..." style="font-size:1.2em;padding:.3em 1.3em" />
-	</th>
-	<td>
-		&gt;&gt;&gt;
+	</div>
+	<div class="th button">
 		<input type="reset" value="Nowe szukanie" />
-	</td>
-  </tr>
- </table>
+	</div>
+  </div>
+ </div>
 </form>
 
 <?php
@@ -121,6 +181,7 @@ if (($word_length > 1) || (strlen($prefix) > 1) || ((strlen($letters) > 0) and (
 	echo '<div style="margin-top:1em;padding-top:1em;border-top:1px dotted silver;"></div>';
 	$f = fopen($slownik, 'r');
 	if ($f) {
+		echo '<a name="list"></a>';
 		echo '<h1>lista wyraz&#243;w dopasowanych:</h1>';
 		$lp = 0;
 		$c = '';
