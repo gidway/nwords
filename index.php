@@ -12,6 +12,9 @@ function debuglog ($m) {
  <meta name="format-detection" content="telephone=no" /> 
  <title>nWords</title>
  <style type="text/css"><!--
+
+	body {background:#b0c4de;color:black;}
+
    .w {margin:0em 1em;font-size:.9em;}
    .w:hover {background-color:silver;}
    .w a {text-decoration:none;}
