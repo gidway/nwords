@@ -83,8 +83,8 @@ function debuglog ($m) {
 <body style="padding-top:4em;">
 
 <?php
-$_REQUEST['letters'] = str_replace(' ', '', $_REQUEST['letters']);
-$_REQUEST['prefix'] = str_replace(' ', '', $_REQUEST['prefix']);
+$_REQUEST['letters'] = str_replace(' ', '', preg_replace('/[0-9]/u', '', $_REQUEST['letters']));
+$_REQUEST['prefix'] = str_replace(' ', '', preg_replace('/[0-9]/u', '', $_REQUEST['prefix']));
 $_REQUEST['length'] = (integer)$_REQUEST['length'];
 $word_length = $_REQUEST['length'];
 $letters_length = strlen($_REQUEST['letters']);
@@ -164,9 +164,31 @@ if (($word_length > 1) || (strlen($prefix) > 1) || ((strlen($letters) > 0) and (
 
 	// get doubled letters
 	$doubled_letters = array();
-	if (preg_match('/(\w)\1+/u', $_letters, $doubled_letters)) {
-		$_letters = preg_replace('/(\w)\1+/u', '$1', $_letters);
-		debuglog('repeated letters: '.join(', ', $doubled_letters));
+	//if (preg_match('/(\w)\1+/u', $_letters, $doubled_letters)) {
+	debuglog('check doubled letters for: '.$_letters);
+	{
+		/* WORKAROUND HACK
+		 * Issue: preg with pattern /(\w)\1+/ not working with PHP ... so we use for-loop and if-else block
+		 */
+		$stringParts = preg_split('/(?!^)(?=.)/u', $_letters);
+		$ll = ''; // last letter
+		$_letters_cp = '';
+		foreach ($stringParts as $at => $chr) {
+			if ($ll == $chr) {
+				if (! isset($doubled_letters[$chr])) $doubled_letters[$chr] = 1;
+				++ $doubled_letters[$chr];
+				debuglog('doubled letter: "'.$chr.'", times = '.$doubled_letters[$chr]);
+			}
+			else {
+				// we need to remove repeated letters for next operations / patterns
+				$_letters_cp .= $chr;
+			}
+			$ll = $chr;
+		}
+		$_letters = $_letters_cp;
+		debuglog('new letters string (removed doubled letters): ['.$_letters.']');
+		unset($_letters_cp);
+		unset($stringParts);
 	}
 
 	$_pattern = '/\b^'.$prefix.'['.$_letters.']'
@@ -187,20 +209,15 @@ if (($word_length > 1) || (strlen($prefix) > 1) || ((strlen($letters) > 0) and (
 		$c = '';
 
 		$_pattern_doubled = ''; // \bd(([u]{2})|([pa]?)){4}\b
-		$_letters_r = array();
-		foreach ($doubled_letters as $key => $value) {
+		foreach ($doubled_letters as $chr => $times) { // @param times: repeated times
 			// \b.*(u{2}u|(a{1}a)).*\b
-			$_c = substr($value, 0 ,1);
-			$_l = strlen($value);
-			if ($_l < 2) continue;
-			$_pattern_doubled .= (($_pattern_doubled != '') ? '|' : '').$_c.'{'.$_l.'}'.$_c;
-			$_letters_r[$_c] = '/'.$_c.'/u';
+			$_pattern_doubled .= (($_pattern_doubled != '') ? '|' : '').$chr.'{'.$times.'}'.$chr;
 		}
 
 		$_letters_x = preg_split('/(?!^)(?=.)/u', $_letters);
-		foreach ($_letters_x as $k => $_c) {
-			if (isset($_letters_r[$_c])) continue;
-			$_pattern_doubled .= (($_pattern_doubled != '') ? '|' : '').$_c.'{1}'.$_c;
+		foreach ($_letters_x as $k => $chr) {
+			if (isset($doubled_letters[$chr])) continue;
+			$_pattern_doubled .= (($_pattern_doubled != '') ? '|' : '').$chr.'{1}'.$chr;
 		}
 		unset($_letters_x);
 		unset($_letters_r);
